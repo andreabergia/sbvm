@@ -1,0 +1,67 @@
+package com.andreabergia.sbvm;
+
+import static com.andreabergia.sbvm.Instructions.HALT;
+import static com.andreabergia.sbvm.Instructions.PUSH;
+import static com.google.common.base.Preconditions.checkState;
+
+public class CPU {
+    private final int[] program;
+    private int instructionAddress = 0;
+    private final CPUStack stack = new CPUStack();
+    private boolean halted = false;
+
+    public CPU(int... instructions) {
+        assert instructions.length > 0;
+        this.program = instructions;
+    }
+
+    public int getInstructionAddress() {
+        return instructionAddress;
+    }
+
+    public CPUStack getStack() {
+        return stack;
+    }
+
+    public boolean isHalted() {
+        return halted;
+    }
+
+    public void run() {
+        while (!halted) {
+            step();
+        }
+    }
+
+    public void step() {
+        checkState(!halted, "An halted CPU cannot execute the program");
+        int nextInstruction = getNextWordFromProgram("Should have a next instruction");
+        decodeInstruction(nextInstruction);
+    }
+
+    private void decodeInstruction(int instruction) {
+        switch (instruction) {
+            default:
+                throw new InvalidProgramException("Unknown instruction: " + instruction);
+
+            case HALT:
+                this.halted = true;
+                break;
+
+            case PUSH:
+                // The word after the instruction will contain the value to push
+                int value = getNextWordFromProgram("Should have the value after the PUSH instruction");
+                stack.push(value);
+                break;
+        }
+    }
+
+    private int getNextWordFromProgram(String errorMessage) {
+        if (instructionAddress >= program.length) {
+            throw new InvalidProgramException(errorMessage);
+        }
+        int nextWord = program[instructionAddress];
+        ++instructionAddress;
+        return nextWord;
+    }
+}
