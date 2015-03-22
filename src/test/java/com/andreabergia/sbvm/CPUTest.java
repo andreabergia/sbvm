@@ -2,6 +2,7 @@ package com.andreabergia.sbvm;
 
 import org.junit.Test;
 
+import static com.andreabergia.sbvm.Instructions.ADD;
 import static com.andreabergia.sbvm.Instructions.HALT;
 import static com.andreabergia.sbvm.Instructions.PUSH;
 import static org.junit.Assert.assertArrayEquals;
@@ -41,6 +42,15 @@ public class CPUTest {
     public void testInvalidProgram() {
         CPU cpu = new CPU(PUSH);
         cpu.step();
+    }
+
+    @Test
+    public void testAddTwoNumbers() {
+        CPU cpu = new CPU(PUSH, 1, PUSH, 2, ADD, HALT);
+        cpu.run();
+        assertEquals(6, cpu.getInstructionAddress());
+        assertTrue(cpu.isHalted());
+        assertStackContains(cpu, 3);
     }
 
     private void assertStackIsEmpty(CPU cpu) {

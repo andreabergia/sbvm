@@ -1,7 +1,9 @@
 package com.andreabergia.sbvm;
 
+import static com.andreabergia.sbvm.Instructions.ADD;
 import static com.andreabergia.sbvm.Instructions.HALT;
 import static com.andreabergia.sbvm.Instructions.PUSH;
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
 public class CPU {
@@ -11,7 +13,7 @@ public class CPU {
     private boolean halted = false;
 
     public CPU(int... instructions) {
-        assert instructions.length > 0;
+        checkArgument(instructions.length > 0, "A program should have at least an instruction");
         this.program = instructions;
     }
 
@@ -48,11 +50,20 @@ public class CPU {
                 this.halted = true;
                 break;
 
-            case PUSH:
+            case PUSH: {
                 // The word after the instruction will contain the value to push
                 int value = getNextWordFromProgram("Should have the value after the PUSH instruction");
                 stack.push(value);
                 break;
+            }
+
+            case ADD: {
+                checkState(stack.size() >= 2);
+                int n1 = stack.pop();
+                int n2 = stack.pop();
+                stack.push(n1 + n2);
+                break;
+            }
         }
     }
 
