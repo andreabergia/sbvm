@@ -40,7 +40,7 @@ public class CPUTest {
     }
 
     @Test(expected = InvalidProgramException.class)
-    public void testInvalidProgram() {
+    public void testPushShouldBeFollowedByAWord() {
         CPU cpu = new CPU(PUSH);
         cpu.step();
     }
@@ -52,6 +52,12 @@ public class CPUTest {
         assertEquals(6, cpu.getInstructionAddress());
         assertTrue(cpu.isHalted());
         assertStackContains(cpu, 3);
+    }
+
+    @Test(expected = InvalidProgramException.class)
+    public void testAddNeedsTwoItemsOnTheStack() {
+        CPU cpu = new CPU(ADD, HALT);
+        cpu.run();
     }
 
     private void assertStackIsEmpty(CPU cpu) {

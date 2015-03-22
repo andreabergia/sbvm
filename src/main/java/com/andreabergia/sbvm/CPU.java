@@ -62,7 +62,9 @@ public class CPU {
             }
 
             case ADD: {
-                checkState(stack.size() >= 2);
+                if (stack.size() < 2) {
+                    throw new InvalidProgramException("There should be at least two items on the stack to execute an ADD");
+                }
                 int n1 = stack.pop();
                 int n2 = stack.pop();
                 stack.push(n1 + n2);
