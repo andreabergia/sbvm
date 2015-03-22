@@ -1,5 +1,9 @@
 package com.andreabergia.sbvm;
 
+import java.util.ArrayDeque;
+import java.util.Collection;
+import java.util.Deque;
+
 import static com.andreabergia.sbvm.Instructions.ADD;
 import static com.andreabergia.sbvm.Instructions.HALT;
 import static com.andreabergia.sbvm.Instructions.PUSH;
@@ -9,7 +13,7 @@ import static com.google.common.base.Preconditions.checkState;
 public class CPU {
     private final int[] program;
     private int instructionAddress = 0;
-    private final CPUStack stack = new CPUStack();
+    private final Deque<Integer> stack = new ArrayDeque<>();
     private boolean halted = false;
 
     public CPU(int... instructions) {
@@ -21,7 +25,7 @@ public class CPU {
         return instructionAddress;
     }
 
-    public CPUStack getStack() {
+    public Collection<Integer> getStack() {
         return stack;
     }
 

@@ -1,5 +1,6 @@
 package com.andreabergia.sbvm;
 
+import com.google.common.primitives.Ints;
 import org.junit.Test;
 
 import static com.andreabergia.sbvm.Instructions.ADD;
@@ -59,6 +60,6 @@ public class CPUTest {
 
     private void assertStackContains(CPU cpu, int... expectedContent) {
         assertEquals(expectedContent.length, cpu.getStack().size());
-        assertArrayEquals(expectedContent, cpu.getStack().getContentAsArray());
+        assertArrayEquals(expectedContent, Ints.toArray(cpu.getStack()));
     }
 }
