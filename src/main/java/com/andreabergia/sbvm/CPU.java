@@ -5,8 +5,11 @@ import java.util.Collection;
 import java.util.Deque;
 
 import static com.andreabergia.sbvm.Instructions.ADD;
+import static com.andreabergia.sbvm.Instructions.DIV;
 import static com.andreabergia.sbvm.Instructions.HALT;
+import static com.andreabergia.sbvm.Instructions.MUL;
 import static com.andreabergia.sbvm.Instructions.PUSH;
+import static com.andreabergia.sbvm.Instructions.SUB;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
@@ -61,15 +64,33 @@ public class CPU {
                 break;
             }
 
-            case ADD: {
+            case ADD:
+            case SUB:
+            case MUL:
+            case DIV: {
                 if (stack.size() < 2) {
                     throw new InvalidProgramException("There should be at least two items on the stack to execute an ADD");
                 }
-                int n1 = stack.pop();
                 int n2 = stack.pop();
-                stack.push(n1 + n2);
+                int n1 = stack.pop();
+                stack.push(doBinaryOp(instruction, n1, n2));
                 break;
             }
+        }
+    }
+
+    private Integer doBinaryOp(int instruction, int n1, int n2) {
+        switch (instruction) {
+            case ADD:
+                return n1 + n2;
+            case SUB:
+                return n1 - n2;
+            case MUL:
+                return n1 * n2;
+            case DIV:
+                return n1 / n2;
+            default:
+                throw new AssertionError();
         }
     }
 
