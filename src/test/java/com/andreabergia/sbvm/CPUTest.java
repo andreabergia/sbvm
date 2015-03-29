@@ -11,6 +11,7 @@ import static com.andreabergia.sbvm.Instructions.HALT;
 import static com.andreabergia.sbvm.Instructions.MUL;
 import static com.andreabergia.sbvm.Instructions.NOT;
 import static com.andreabergia.sbvm.Instructions.OR;
+import static com.andreabergia.sbvm.Instructions.POP;
 import static com.andreabergia.sbvm.Instructions.PUSH;
 import static com.andreabergia.sbvm.Instructions.SUB;
 import static org.junit.Assert.assertArrayEquals;
@@ -53,6 +54,32 @@ public class CPUTest {
     @Test(expected = InvalidProgramException.class)
     public void testPushShouldBeFollowedByAWord() {
         CPU cpu = new CPU(PUSH);
+        cpu.step();
+    }
+
+    @Test
+    public void testPop() {
+        CPU cpu = new CPU(PUSH, 42, POP, HALT);
+        assertProgramRunsToHaltAndInstructionAddressIs(cpu, 4);
+        assertStackIsEmpty(cpu);
+    }
+
+    @Test(expected = InvalidProgramException.class)
+    public void testPopNeedsAnItemOnTheStack() {
+        CPU cpu = new CPU(POP);
+        cpu.step();
+    }
+
+    @Test
+    public void testDup() {
+        CPU cpu = new CPU(PUSH, 42, DUP, HALT);
+        assertProgramRunsToHaltAndInstructionAddressIs(cpu, 4);
+        assertStackContains(cpu, 42, 42);
+    }
+
+    @Test(expected = InvalidProgramException.class)
+    public void testDupNeedsAnItemOnTheStack() {
+        CPU cpu = new CPU(DUP);
         cpu.step();
     }
 

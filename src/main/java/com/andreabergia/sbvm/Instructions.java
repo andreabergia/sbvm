@@ -10,4 +10,6 @@ public class Instructions {
     public static final int NOT = 0x07;
     public static final int AND = 0x08;
     public static final int OR = 0x09;
+    public static final int POP = 0x0A;
+    public static final int DUP = 0x0B;
 }

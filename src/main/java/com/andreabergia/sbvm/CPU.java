@@ -7,10 +7,12 @@ import java.util.Deque;
 import static com.andreabergia.sbvm.Instructions.ADD;
 import static com.andreabergia.sbvm.Instructions.AND;
 import static com.andreabergia.sbvm.Instructions.DIV;
+import static com.andreabergia.sbvm.Instructions.DUP;
 import static com.andreabergia.sbvm.Instructions.HALT;
 import static com.andreabergia.sbvm.Instructions.MUL;
 import static com.andreabergia.sbvm.Instructions.NOT;
 import static com.andreabergia.sbvm.Instructions.OR;
+import static com.andreabergia.sbvm.Instructions.POP;
 import static com.andreabergia.sbvm.Instructions.PUSH;
 import static com.andreabergia.sbvm.Instructions.SUB;
 import static com.google.common.base.Preconditions.checkArgument;
@@ -67,10 +69,21 @@ public class CPU {
                 break;
             }
 
+            case POP: {
+                checkStackHasAtLeastOneItem("POP");
+                stack.pop();
+                break;
+            }
+
+            case DUP: {
+                checkStackHasAtLeastOneItem("DUP");
+                int n = stack.peek();
+                stack.push(n);
+                break;
+            }
+
             case NOT: {
-                if (stack.size() < 1) {
-                    throw new InvalidProgramException("There should be at least one item on the stack to execute a NOT instruction");
-                }
+                checkStackHasAtLeastOneItem("NOT");
                 stack.push(toInt(!toBool(stack.pop())));
                 break;
             }
@@ -89,6 +102,12 @@ public class CPU {
                 stack.push(doBinaryOp(instruction, n1, n2));
                 break;
             }
+        }
+    }
+
+    private void checkStackHasAtLeastOneItem(String instruction) {
+        if (stack.size() < 1) {
+            throw new InvalidProgramException("There should be at least one item on the stack to execute an " + instruction + " instruction");
         }
     }
 
