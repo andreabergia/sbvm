@@ -4,9 +4,13 @@ import com.google.common.primitives.Ints;
 import org.junit.Test;
 
 import static com.andreabergia.sbvm.Instructions.ADD;
+import static com.andreabergia.sbvm.Instructions.AND;
 import static com.andreabergia.sbvm.Instructions.DIV;
+import static com.andreabergia.sbvm.Instructions.DUP;
 import static com.andreabergia.sbvm.Instructions.HALT;
 import static com.andreabergia.sbvm.Instructions.MUL;
+import static com.andreabergia.sbvm.Instructions.NOT;
+import static com.andreabergia.sbvm.Instructions.OR;
 import static com.andreabergia.sbvm.Instructions.PUSH;
 import static com.andreabergia.sbvm.Instructions.SUB;
 import static org.junit.Assert.assertArrayEquals;
@@ -15,6 +19,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class CPUTest {
+    // Basic instructions
+
     @Test
     public void testEmptyProgramDoesNothing() {
         CPU cpu = new CPU(HALT);
@@ -23,6 +29,8 @@ public class CPUTest {
         assertTrue(cpu.isHalted());
         assertStackIsEmpty(cpu);
     }
+
+    // Stack instructions
 
     @Test
     public void testPushAndThenHalt() {
@@ -47,6 +55,8 @@ public class CPUTest {
         CPU cpu = new CPU(PUSH);
         cpu.step();
     }
+
+    // Arithmetic instructions
 
     @Test
     public void testAddTwoNumbers() {
@@ -99,6 +109,56 @@ public class CPUTest {
         CPU cpu = new CPU(DIV, HALT);
         cpu.run();
     }
+
+    // Boolean instructions
+
+    @Test
+    public void testUnaryNotTrue() {
+        CPU cpu = new CPU(PUSH, 1, NOT, HALT);
+        assertProgramRunsToHaltAndInstructionAddressIs(cpu, 4);
+        assertStackContains(cpu, 0);
+    }
+
+    @Test
+    public void testUnaryNotFalse() {
+        CPU cpu = new CPU(PUSH, 0, NOT, HALT);
+        assertProgramRunsToHaltAndInstructionAddressIs(cpu, 4);
+        assertStackContains(cpu, 1);
+    }
+
+    @Test(expected = InvalidProgramException.class)
+    public void testNotNeedsOneItemOnTheStack() {
+        CPU cpu = new CPU(NOT, HALT);
+        cpu.run();
+    }
+
+    @Test
+    public void testAndTrueTrue() {
+        CPU cpu = new CPU(PUSH, 1, PUSH, 1, AND, HALT);
+        assertProgramRunsToHaltAndInstructionAddressIs(cpu, 6);
+        assertStackContains(cpu, 1);
+    }
+
+    @Test(expected = InvalidProgramException.class)
+    public void testAndNeedsTwoItemsOnTheStack() {
+        CPU cpu = new CPU(AND, HALT);
+        cpu.run();
+    }
+
+    @Test
+    public void testOrTrueFalse() {
+        CPU cpu = new CPU(PUSH, 1, PUSH, 0, OR, HALT);
+        assertProgramRunsToHaltAndInstructionAddressIs(cpu, 6);
+        assertStackContains(cpu, 1);
+    }
+
+    @Test(expected = InvalidProgramException.class)
+    public void testOrNeedsTwoItemsOnTheStack() {
+        CPU cpu = new CPU(OR, HALT);
+        cpu.run();
+    }
+
+    // Utility methods
 
     private void assertProgramRunsToHaltAndInstructionAddressIs(CPU cpu, int address) {
         cpu.run();

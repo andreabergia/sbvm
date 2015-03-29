@@ -5,9 +5,12 @@ import java.util.Collection;
 import java.util.Deque;
 
 import static com.andreabergia.sbvm.Instructions.ADD;
+import static com.andreabergia.sbvm.Instructions.AND;
 import static com.andreabergia.sbvm.Instructions.DIV;
 import static com.andreabergia.sbvm.Instructions.HALT;
 import static com.andreabergia.sbvm.Instructions.MUL;
+import static com.andreabergia.sbvm.Instructions.NOT;
+import static com.andreabergia.sbvm.Instructions.OR;
 import static com.andreabergia.sbvm.Instructions.PUSH;
 import static com.andreabergia.sbvm.Instructions.SUB;
 import static com.google.common.base.Preconditions.checkArgument;
@@ -64,12 +67,22 @@ public class CPU {
                 break;
             }
 
+            case NOT: {
+                if (stack.size() < 1) {
+                    throw new InvalidProgramException("There should be at least one item on the stack to execute a NOT instruction");
+                }
+                stack.push(toInt(!toBool(stack.pop())));
+                break;
+            }
+
             case ADD:
             case SUB:
             case MUL:
-            case DIV: {
+            case DIV:
+            case AND:
+            case OR: {
                 if (stack.size() < 2) {
-                    throw new InvalidProgramException("There should be at least two items on the stack to execute an ADD");
+                    throw new InvalidProgramException("There should be at least two items on the stack to execute a binary instruction");
                 }
                 int n2 = stack.pop();
                 int n1 = stack.pop();
@@ -89,9 +102,21 @@ public class CPU {
                 return n1 * n2;
             case DIV:
                 return n1 / n2;
+            case AND:
+                return toInt(toBool(n1) && toBool(n2));
+            case OR:
+                return toInt(toBool(n1) || toBool(n2));
             default:
                 throw new AssertionError();
         }
+    }
+
+    private boolean toBool(int n) {
+        return n != 0;
+    }
+
+    private int toInt(boolean b) {
+        return b ? 1 : 0;
     }
 
     private int getNextWordFromProgram(String errorMessage) {
