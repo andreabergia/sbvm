@@ -9,6 +9,9 @@ import static com.andreabergia.sbvm.Instructions.AND;
 import static com.andreabergia.sbvm.Instructions.DIV;
 import static com.andreabergia.sbvm.Instructions.DUP;
 import static com.andreabergia.sbvm.Instructions.HALT;
+import static com.andreabergia.sbvm.Instructions.ISEQ;
+import static com.andreabergia.sbvm.Instructions.ISGE;
+import static com.andreabergia.sbvm.Instructions.ISGT;
 import static com.andreabergia.sbvm.Instructions.MUL;
 import static com.andreabergia.sbvm.Instructions.NOT;
 import static com.andreabergia.sbvm.Instructions.OR;
@@ -93,7 +96,10 @@ public class CPU {
             case MUL:
             case DIV:
             case AND:
-            case OR: {
+            case OR:
+            case ISEQ:
+            case ISGE:
+            case ISGT: {
                 if (stack.size() < 2) {
                     throw new InvalidProgramException("There should be at least two items on the stack to execute a binary instruction");
                 }
@@ -125,6 +131,12 @@ public class CPU {
                 return toInt(toBool(n1) && toBool(n2));
             case OR:
                 return toInt(toBool(n1) || toBool(n2));
+            case ISEQ:
+                return toInt(n1 == n2);
+            case ISGE:
+                return toInt(n1 >= n2);
+            case ISGT:
+                return toInt(n1 > n2);
             default:
                 throw new AssertionError();
         }

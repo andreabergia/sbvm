@@ -12,4 +12,7 @@ public class Instructions {
     public static final int OR = 0x09;
     public static final int POP = 0x0A;
     public static final int DUP = 0x0B;
+    public static final int ISEQ = 0x0C;
+    public static final int ISGE = 0x0D;
+    public static final int ISGT = 0x0E;
 }

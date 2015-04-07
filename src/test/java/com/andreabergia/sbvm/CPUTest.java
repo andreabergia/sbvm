@@ -8,6 +8,9 @@ import static com.andreabergia.sbvm.Instructions.AND;
 import static com.andreabergia.sbvm.Instructions.DIV;
 import static com.andreabergia.sbvm.Instructions.DUP;
 import static com.andreabergia.sbvm.Instructions.HALT;
+import static com.andreabergia.sbvm.Instructions.ISEQ;
+import static com.andreabergia.sbvm.Instructions.ISGE;
+import static com.andreabergia.sbvm.Instructions.ISGT;
 import static com.andreabergia.sbvm.Instructions.MUL;
 import static com.andreabergia.sbvm.Instructions.NOT;
 import static com.andreabergia.sbvm.Instructions.OR;
@@ -185,11 +188,73 @@ public class CPUTest {
         cpu.run();
     }
 
+    // Comparison instructions
+
+    @Test
+    public void testIsEqualsFalse() {
+        CPU cpu = new CPU(PUSH, 8, PUSH, 2, ISEQ, HALT);
+        assertProgramRunsToHaltAndInstructionAddressIs(cpu, 6);
+        assertStackContains(cpu, 0);
+    }
+
+    @Test
+    public void testIsEqualsTrue() {
+        CPU cpu = new CPU(PUSH, 2, PUSH, 2, ISEQ, HALT);
+        assertProgramRunsToHaltAndInstructionAddressIs(cpu, 6);
+        assertStackContains(cpu, 1);
+    }
+
+    @Test(expected = InvalidProgramException.class)
+    public void testIsEqualsNeedsTwoItemsOnTheStack() {
+        CPU cpu = new CPU(ISEQ, HALT);
+        cpu.run();
+    }
+
+    @Test
+    public void testIsGreaterEqualsTrue() {
+        CPU cpu = new CPU(PUSH, 3, PUSH, 2, ISGE, HALT);
+        assertProgramRunsToHaltAndInstructionAddressIs(cpu, 6);
+        assertStackContains(cpu, 1);
+    }
+
+    @Test
+    public void testIsGreaterEqualsFalse() {
+        CPU cpu = new CPU(PUSH, 1, PUSH, 2, ISGE, HALT);
+        assertProgramRunsToHaltAndInstructionAddressIs(cpu, 6);
+        assertStackContains(cpu, 0);
+    }
+
+    @Test(expected = InvalidProgramException.class)
+    public void testIsGreaterEqualsNeedsTwoItemsOnTheStack() {
+        CPU cpu = new CPU(ISGE, HALT);
+        cpu.run();
+    }
+
+    @Test
+    public void testIsGreaterFalse() {
+        CPU cpu = new CPU(PUSH, 1, PUSH, 2, ISGT, HALT);
+        assertProgramRunsToHaltAndInstructionAddressIs(cpu, 6);
+        assertStackContains(cpu, 0);
+    }
+
+    @Test
+    public void testIsGreaterTrue() {
+        CPU cpu = new CPU(PUSH, 3, PUSH, 2, ISGT, HALT);
+        assertProgramRunsToHaltAndInstructionAddressIs(cpu, 6);
+        assertStackContains(cpu, 1);
+    }
+
+    @Test(expected = InvalidProgramException.class)
+    public void testIsGreaterNeedsTwoItemsOnTheStack() {
+        CPU cpu = new CPU(ISGT, HALT);
+        cpu.run();
+    }
+
     // Utility methods
 
-    private void assertProgramRunsToHaltAndInstructionAddressIs(CPU cpu, int address) {
+    private void assertProgramRunsToHaltAndInstructionAddressIs(CPU cpu, int expectedAddress) {
         cpu.run();
-        assertEquals(address, cpu.getInstructionAddress());
+        assertEquals(expectedAddress, cpu.getInstructionAddress());
         assertTrue(cpu.isHalted());
     }
 
