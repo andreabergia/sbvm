@@ -1,8 +1,11 @@
 package com.andreabergia.sbvm;
 
-import com.google.common.primitives.Ints;
 import org.junit.Test;
 
+import static com.andreabergia.sbvm.CPUAssertions.assertProgramRunsToHaltAndInstructionAddressIs;
+import static com.andreabergia.sbvm.CPUAssertions.assertStackContains;
+import static com.andreabergia.sbvm.CPUAssertions.assertStackIsEmpty;
+import static com.andreabergia.sbvm.CPUAssertions.assertVariableValues;
 import static com.andreabergia.sbvm.Instructions.ADD;
 import static com.andreabergia.sbvm.Instructions.AND;
 import static com.andreabergia.sbvm.Instructions.DIV;
@@ -21,7 +24,6 @@ import static com.andreabergia.sbvm.Instructions.POP;
 import static com.andreabergia.sbvm.Instructions.PUSH;
 import static com.andreabergia.sbvm.Instructions.STORE;
 import static com.andreabergia.sbvm.Instructions.SUB;
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -330,30 +332,5 @@ public class CPUTest {
     public void testStoreNeedsOneItemOnTheStack() {
         CPU cpu = new CPU(STORE, 0, HALT);
         cpu.run();
-    }
-
-    // Utility methods
-
-    private void assertProgramRunsToHaltAndInstructionAddressIs(CPU cpu, int expectedAddress) {
-        cpu.run();
-        assertEquals(expectedAddress, cpu.getInstructionAddress());
-        assertTrue(cpu.isHalted());
-    }
-
-    private void assertStackIsEmpty(CPU cpu) {
-        assertTrue(cpu.getStack().isEmpty());
-    }
-
-    private void assertStackContains(CPU cpu, int... expectedContent) {
-        assertEquals(expectedContent.length, cpu.getStack().size());
-        assertArrayEquals(expectedContent, Ints.toArray(cpu.getStack()));
-    }
-
-    private void assertVariableValues(CPU cpu, int... expectedVariableValues) {
-        Frame frame = cpu.getCurrentFrame();
-        for (int varNumber = 0; varNumber < expectedVariableValues.length; varNumber++) {
-            int expectedVariableValue = expectedVariableValues[varNumber];
-            assertEquals("Checking variable #" + varNumber, expectedVariableValue, frame.getVariable(varNumber));
-        }
     }
 }
