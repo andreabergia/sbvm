@@ -8,6 +8,7 @@ import static com.andreabergia.sbvm.CPUAssertions.assertVariableValues;
 import static com.andreabergia.sbvm.Instructions.ADD;
 import static com.andreabergia.sbvm.Instructions.HALT;
 import static com.andreabergia.sbvm.Instructions.ISGE;
+import static com.andreabergia.sbvm.Instructions.ISGT;
 import static com.andreabergia.sbvm.Instructions.JIF;
 import static com.andreabergia.sbvm.Instructions.JMP;
 import static com.andreabergia.sbvm.Instructions.LOAD;
@@ -17,6 +18,45 @@ import static com.andreabergia.sbvm.Instructions.STORE;
 import static com.andreabergia.sbvm.Instructions.SUB;
 
 public class CompleteProgramsTest {
+    @Test
+    public void testIfInstruction() throws Exception {
+        /**
+         * The code is:
+         * if (a > b) {
+         *     c = a;
+         * } else {
+         *     c = b;
+         * }
+         *
+         * We're going to use variable 0 as "a", variable 1 as "b", variable 2 as "c".
+         */
+        CPU cpu = new CPU(
+                // Init a with "6"
+                PUSH, 6,
+                STORE, 0,
+                // Init b with "4"
+                PUSH, 4,
+                STORE, 1,
+                // Load a and b into the stack
+                LOAD, 0,            // Stack contains a
+                LOAD, 1,            // Stack contains a, b
+                ISGT,               // Stack contains a > b
+                JIF, 21,
+                // This is the "else" path
+                LOAD, 1,            // Stack contains b
+                STORE, 2,           // Set c to the stack head, meaning c = b
+                JMP, 25,
+                // This is the "if" path
+                LOAD, 0,            // Stack contains a
+                STORE, 2,           // Set c to the stack head, meaning c = a
+                // Done; this is address
+                HALT
+        );
+        assertProgramRunsToHaltAndInstructionAddressIs(cpu, 26);
+        assertStackIsEmpty(cpu);
+        assertVariableValues(cpu, 6, 4, 6);
+    }
+
     @Test
     public void testMultiplication() throws Exception {
         /**
