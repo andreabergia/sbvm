@@ -13,11 +13,13 @@ import static com.andreabergia.sbvm.Instructions.ISGE;
 import static com.andreabergia.sbvm.Instructions.ISGT;
 import static com.andreabergia.sbvm.Instructions.JIF;
 import static com.andreabergia.sbvm.Instructions.JMP;
+import static com.andreabergia.sbvm.Instructions.LOAD;
 import static com.andreabergia.sbvm.Instructions.MUL;
 import static com.andreabergia.sbvm.Instructions.NOT;
 import static com.andreabergia.sbvm.Instructions.OR;
 import static com.andreabergia.sbvm.Instructions.POP;
 import static com.andreabergia.sbvm.Instructions.PUSH;
+import static com.andreabergia.sbvm.Instructions.STORE;
 import static com.andreabergia.sbvm.Instructions.SUB;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -287,6 +289,49 @@ public class CPUTest {
         cpu.run();
     }
 
+    // Load and Store
+
+    @Test
+    public void testLoadVariableNotInitialized() {
+        CPU cpu = new CPU(LOAD, 0, HALT);
+        assertProgramRunsToHaltAndInstructionAddressIs(cpu, 3);
+        assertStackContains(cpu, 0);
+    }
+
+    @Test
+    public void testStoreVariable() {
+        CPU cpu = new CPU(PUSH, 42, STORE, 0, HALT);
+        assertProgramRunsToHaltAndInstructionAddressIs(cpu, 5);
+        assertStackIsEmpty(cpu);
+        assertVariableValues(cpu, 42);
+    }
+
+    @Test
+    public void testStoreAndLoadVariable() {
+        CPU cpu = new CPU(PUSH, 42, STORE, 0, LOAD, 0, HALT);
+        assertProgramRunsToHaltAndInstructionAddressIs(cpu, 7);
+        assertStackContains(cpu, 42);
+        assertVariableValues(cpu, 42);
+    }
+
+    @Test(expected = InvalidProgramException.class)
+    public void testLoadNeedsOneArgument() {
+        CPU cpu = new CPU(LOAD);
+        cpu.run();
+    }
+
+    @Test(expected = InvalidProgramException.class)
+    public void testStoreNeedsOneArgument() {
+        CPU cpu = new CPU(STORE);
+        cpu.run();
+    }
+
+    @Test(expected = InvalidProgramException.class)
+    public void testStoreNeedsOneItemOnTheStack() {
+        CPU cpu = new CPU(STORE, 0, HALT);
+        cpu.run();
+    }
+
     // Utility methods
 
     private void assertProgramRunsToHaltAndInstructionAddressIs(CPU cpu, int expectedAddress) {
@@ -302,5 +347,13 @@ public class CPUTest {
     private void assertStackContains(CPU cpu, int... expectedContent) {
         assertEquals(expectedContent.length, cpu.getStack().size());
         assertArrayEquals(expectedContent, Ints.toArray(cpu.getStack()));
+    }
+
+    private void assertVariableValues(CPU cpu, int... expectedVariableValues) {
+        Frame frame = cpu.getCurrentFrame();
+        for (int varNumber = 0; varNumber < expectedVariableValues.length; varNumber++) {
+            int expectedVariableValue = expectedVariableValues[varNumber];
+            assertEquals("Checking variable #" + varNumber, expectedVariableValue, frame.getVariable(varNumber));
+        }
     }
 }

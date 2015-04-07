@@ -14,20 +14,25 @@ import static com.andreabergia.sbvm.Instructions.ISGE;
 import static com.andreabergia.sbvm.Instructions.ISGT;
 import static com.andreabergia.sbvm.Instructions.JIF;
 import static com.andreabergia.sbvm.Instructions.JMP;
+import static com.andreabergia.sbvm.Instructions.LOAD;
 import static com.andreabergia.sbvm.Instructions.MUL;
 import static com.andreabergia.sbvm.Instructions.NOT;
 import static com.andreabergia.sbvm.Instructions.OR;
 import static com.andreabergia.sbvm.Instructions.POP;
 import static com.andreabergia.sbvm.Instructions.PUSH;
+import static com.andreabergia.sbvm.Instructions.STORE;
 import static com.andreabergia.sbvm.Instructions.SUB;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
+
+
 
 public class CPU {
     private final int[] program;
     private int instructionAddress = 0;
     private final Deque<Integer> stack = new ArrayDeque<>();
     private boolean halted = false;
+    private Frame currentFrame = new Frame();
 
     public CPU(int... instructions) {
         checkArgument(instructions.length > 0, "A program should have at least an instruction");
@@ -84,6 +89,19 @@ public class CPU {
                 checkStackHasAtLeastOneItem("DUP");
                 int n = stack.peek();
                 stack.push(n);
+                break;
+            }
+
+            case LOAD: {
+                int varNumber = getNextWordFromProgram("Should have the variable number after the LOAD instruction");
+                stack.push(currentFrame.getVariable(varNumber));
+                break;
+            }
+
+            case STORE: {
+                int varNumber = getNextWordFromProgram("Should have the variable number after the STORE instruction");
+                checkStackHasAtLeastOneItem("STORE");
+                currentFrame.setVariable(varNumber, stack.pop());
                 break;
             }
 
@@ -184,5 +202,9 @@ public class CPU {
         int nextWord = program[instructionAddress];
         ++instructionAddress;
         return nextWord;
+    }
+
+    public Frame getCurrentFrame() {
+        return currentFrame;
     }
 }

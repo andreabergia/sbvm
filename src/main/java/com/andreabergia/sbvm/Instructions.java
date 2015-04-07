@@ -17,4 +17,6 @@ public class Instructions {
     public static final int ISGT = 0x0E;
     public static final int JMP = 0x0F;
     public static final int JIF = 0x10;
+    public static final int LOAD = 0x11;
+    public static final int STORE = 0x12;
 }
