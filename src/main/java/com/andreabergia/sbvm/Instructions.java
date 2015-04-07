@@ -15,4 +15,6 @@ public class Instructions {
     public static final int ISEQ = 0x0C;
     public static final int ISGE = 0x0D;
     public static final int ISGT = 0x0E;
+    public static final int JMP = 0x0F;
+    public static final int JIF = 0x10;
 }

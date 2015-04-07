@@ -12,6 +12,8 @@ import static com.andreabergia.sbvm.Instructions.HALT;
 import static com.andreabergia.sbvm.Instructions.ISEQ;
 import static com.andreabergia.sbvm.Instructions.ISGE;
 import static com.andreabergia.sbvm.Instructions.ISGT;
+import static com.andreabergia.sbvm.Instructions.JIF;
+import static com.andreabergia.sbvm.Instructions.JMP;
 import static com.andreabergia.sbvm.Instructions.MUL;
 import static com.andreabergia.sbvm.Instructions.NOT;
 import static com.andreabergia.sbvm.Instructions.OR;
@@ -108,6 +110,31 @@ public class CPU {
                 stack.push(doBinaryOp(instruction, n1, n2));
                 break;
             }
+
+            case JMP: {
+                // The word after the instruction will contain the address to jump to
+                int address = getNextWordFromProgram("Should have the address after the JMP instruction");
+                checkJumpAddress(address);
+                this.instructionAddress = address;
+                break;
+            }
+
+            case JIF: {
+                // The word after the instruction will contain the address to jump to
+                int address = getNextWordFromProgram("Should have the address after the JIF instruction");
+                checkJumpAddress(address);
+                checkStackHasAtLeastOneItem("JIF");
+                if (toBool(stack.pop())) {
+                    this.instructionAddress = address;
+                }
+                break;
+            }
+        }
+    }
+
+    private void checkJumpAddress(int address) {
+        if (address < 0 || address >= program.length) {
+            throw new InvalidProgramException(String.format("Invalid jump address %d at %d", address, instructionAddress));
         }
     }
 

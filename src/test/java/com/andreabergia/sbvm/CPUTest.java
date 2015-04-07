@@ -11,6 +11,8 @@ import static com.andreabergia.sbvm.Instructions.HALT;
 import static com.andreabergia.sbvm.Instructions.ISEQ;
 import static com.andreabergia.sbvm.Instructions.ISGE;
 import static com.andreabergia.sbvm.Instructions.ISGT;
+import static com.andreabergia.sbvm.Instructions.JIF;
+import static com.andreabergia.sbvm.Instructions.JMP;
 import static com.andreabergia.sbvm.Instructions.MUL;
 import static com.andreabergia.sbvm.Instructions.NOT;
 import static com.andreabergia.sbvm.Instructions.OR;
@@ -247,6 +249,41 @@ public class CPUTest {
     @Test(expected = InvalidProgramException.class)
     public void testIsGreaterNeedsTwoItemsOnTheStack() {
         CPU cpu = new CPU(ISGT, HALT);
+        cpu.run();
+    }
+
+    // Jumps
+
+    @Test
+    public void testUnconditionalJump() {
+        // address:       0    1  2     3    4
+        CPU cpu = new CPU(JMP, 3, HALT, JMP, 2);
+        assertProgramRunsToHaltAndInstructionAddressIs(cpu, 3);
+    }
+
+    @Test(expected = InvalidProgramException.class)
+    public void testJumpNeedsOneArgument() {
+        CPU cpu = new CPU(JMP);
+        cpu.run();
+    }
+
+    @Test
+    public void testConditionalJump() {
+        // address:       0     1  2    3  4    5     6  7    8  9
+        CPU cpu = new CPU(PUSH, 1, JIF, 5, POP, PUSH, 0, JIF, 4, HALT);
+        assertProgramRunsToHaltAndInstructionAddressIs(cpu, 10);
+        // If the program hit the POP, we'd have an error
+    }
+
+    @Test(expected = InvalidProgramException.class)
+    public void testConditionalJumpNeedsOneArgument() {
+        CPU cpu = new CPU(PUSH, 1, JIF);
+        cpu.run();
+    }
+
+    @Test(expected = InvalidProgramException.class)
+    public void testJumpNeedsOneItemOnTheStack() {
+        CPU cpu = new CPU(JIF, 0, HALT);
         cpu.run();
     }
 
