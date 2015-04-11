@@ -46,10 +46,10 @@ public class CompleteProgramsTest {
                 LOAD, 1,            // Stack contains b
                 STORE, 2,           // Set c to the stack head, meaning c = b
                 JMP, 25,
-                // This is the "if" path
+                // This is the "if" path, and this is the address 21
                 LOAD, 0,            // Stack contains a
                 STORE, 2,           // Set c to the stack head, meaning c = a
-                // Done; this is address
+                // Done; this is address 25
                 HALT
         );
         assertProgramRunsToHaltAndInstructionAddressIs(cpu, 26);
@@ -93,12 +93,12 @@ public class CompleteProgramsTest {
                 LOAD, 0,            // Stack contains a
                 LOAD, 2,            // Stack contains a, total
                 ADD,                // Stack contains a + total
-                STORE, 2,           // Save in total
+                STORE, 2,           // Save in total, meaning total = a + total
                 LOAD, 1,            // Stack contains b
                 PUSH, 1,            // Stack contains b, 1
                 SUB,                // Stack contains b - 1
-                STORE, 1,           // Save in b
-                JMP, 12,
+                STORE, 1,           // Save in b, meaning b = b - 1
+                JMP, 12,            // Go back to the start of the loop
                 HALT
         );
         assertProgramRunsToHaltAndInstructionAddressIs(cpu, 37);
