@@ -3,9 +3,11 @@ package com.andreabergia.sbvm;
 import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Deque;
+import java.util.Stack;
 
 import static com.andreabergia.sbvm.Instructions.ADD;
 import static com.andreabergia.sbvm.Instructions.AND;
+import static com.andreabergia.sbvm.Instructions.CALL;
 import static com.andreabergia.sbvm.Instructions.DIV;
 import static com.andreabergia.sbvm.Instructions.DUP;
 import static com.andreabergia.sbvm.Instructions.HALT;
@@ -20,11 +22,11 @@ import static com.andreabergia.sbvm.Instructions.NOT;
 import static com.andreabergia.sbvm.Instructions.OR;
 import static com.andreabergia.sbvm.Instructions.POP;
 import static com.andreabergia.sbvm.Instructions.PUSH;
+import static com.andreabergia.sbvm.Instructions.RET;
 import static com.andreabergia.sbvm.Instructions.STORE;
 import static com.andreabergia.sbvm.Instructions.SUB;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
-
 
 
 public class CPU {
@@ -32,11 +34,12 @@ public class CPU {
     private int instructionAddress = 0;
     private final Deque<Integer> stack = new ArrayDeque<>();
     private boolean halted = false;
-    private Frame currentFrame = new Frame();
+    private Stack<Frame> frames = new Stack<>();
 
     public CPU(int... instructions) {
         checkArgument(instructions.length > 0, "A program should have at least an instruction");
         this.program = instructions;
+        this.frames.push(new Frame(0)); // Prepare the initial frame
     }
 
     public int getInstructionAddress() {
@@ -94,14 +97,14 @@ public class CPU {
 
             case LOAD: {
                 int varNumber = getNextWordFromProgram("Should have the variable number after the LOAD instruction");
-                stack.push(currentFrame.getVariable(varNumber));
+                stack.push(getCurrentFrame().getVariable(varNumber));
                 break;
             }
 
             case STORE: {
                 int varNumber = getNextWordFromProgram("Should have the variable number after the STORE instruction");
                 checkStackHasAtLeastOneItem("STORE");
-                currentFrame.setVariable(varNumber, stack.pop());
+                getCurrentFrame().setVariable(varNumber, stack.pop());
                 break;
             }
 
@@ -147,12 +150,36 @@ public class CPU {
                 }
                 break;
             }
+
+            case CALL: {
+                // The word after the instruction will contain the function address
+                int address = getNextWordFromProgram("Should have the address after the CALL instruction");
+                checkJumpAddress(address);
+                this.frames.push(new Frame(this.instructionAddress)); // Push a new stack frame
+                this.instructionAddress = address;                    // and jump!
+                break;
+            }
+
+            case RET: {
+                // Pop the stack frame and return to the previous address
+                checkThereIsAReturnAddress();
+                int returnAddress = getCurrentFrame().getReturnAddress();
+                this.frames.pop();
+                this.instructionAddress = returnAddress;
+                break;
+            }
         }
     }
 
     private void checkJumpAddress(int address) {
         if (address < 0 || address >= program.length) {
             throw new InvalidProgramException(String.format("Invalid jump address %d at %d", address, instructionAddress));
+        }
+    }
+
+    private void checkThereIsAReturnAddress() {
+        if (this.frames.size() == 1) {
+            throw new InvalidProgramException(String.format("Invalid RET instruction: no current function call %d", instructionAddress));
         }
     }
 
@@ -205,6 +232,6 @@ public class CPU {
     }
 
     public Frame getCurrentFrame() {
-        return currentFrame;
+        return frames.peek();
     }
 }

@@ -19,4 +19,6 @@ public class Instructions {
     public static final int JIF = 0x10;
     public static final int LOAD = 0x11;
     public static final int STORE = 0x12;
+    public static final int CALL = 0x13;
+    public static final int RET = 0x15;
 }

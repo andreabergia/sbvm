@@ -3,9 +3,11 @@ package com.andreabergia.sbvm;
 import org.junit.Test;
 
 import static com.andreabergia.sbvm.CPUAssertions.assertProgramRunsToHaltAndInstructionAddressIs;
+import static com.andreabergia.sbvm.CPUAssertions.assertStackContains;
 import static com.andreabergia.sbvm.CPUAssertions.assertStackIsEmpty;
 import static com.andreabergia.sbvm.CPUAssertions.assertVariableValues;
 import static com.andreabergia.sbvm.Instructions.ADD;
+import static com.andreabergia.sbvm.Instructions.CALL;
 import static com.andreabergia.sbvm.Instructions.HALT;
 import static com.andreabergia.sbvm.Instructions.ISGE;
 import static com.andreabergia.sbvm.Instructions.ISGT;
@@ -14,6 +16,7 @@ import static com.andreabergia.sbvm.Instructions.JMP;
 import static com.andreabergia.sbvm.Instructions.LOAD;
 import static com.andreabergia.sbvm.Instructions.NOT;
 import static com.andreabergia.sbvm.Instructions.PUSH;
+import static com.andreabergia.sbvm.Instructions.RET;
 import static com.andreabergia.sbvm.Instructions.STORE;
 import static com.andreabergia.sbvm.Instructions.SUB;
 
@@ -104,5 +107,44 @@ public class CompleteProgramsTest {
         assertProgramRunsToHaltAndInstructionAddressIs(cpu, 37);
         assertStackIsEmpty(cpu);
         assertVariableValues(cpu, 6, 0, 24);
+    }
+
+    @Test
+    public void testMaxAB() throws Exception {
+        /**
+         * We're going to create a function that returns the maximum of its two arguments.
+         *
+         * The algorithm is obviously:
+         *
+         * int max(int a, int b) {
+         *     if (a > b) {
+         *         return a;
+         *     } else {
+         *         return b;
+         *     }
+         * }
+         *
+         *
+         */
+        CPU cpu = new CPU(
+                PUSH, 6,        // Push the first argument
+                PUSH, 4,        // Push the second argument
+                CALL, 7,        // Call "max"
+                HALT,
+                // Here is address 7, the start of "max" function
+                STORE, 1,       // Store b in local variable 1; the stack now contains [a]
+                STORE, 0,       // Store a in local variable 0; the stack is now empty
+                LOAD, 0,       // The stack now contains [a]
+                LOAD, 1,       // The stack now contains [a, b]
+                ISGE,           // The stack now contains [a > b]
+                JIF, 21,        // If the top of the stack is true (a > b), jump to the "if" path
+                LOAD, 1,        // "else" path: load b on the stack
+                RET,
+                // Here is address 23
+                LOAD, 0,        // "if" path: load a on the stack
+                RET
+        );
+        assertProgramRunsToHaltAndInstructionAddressIs(cpu, 7);
+        assertStackContains(cpu, 6);
     }
 }

@@ -8,6 +8,7 @@ import static com.andreabergia.sbvm.CPUAssertions.assertStackIsEmpty;
 import static com.andreabergia.sbvm.CPUAssertions.assertVariableValues;
 import static com.andreabergia.sbvm.Instructions.ADD;
 import static com.andreabergia.sbvm.Instructions.AND;
+import static com.andreabergia.sbvm.Instructions.CALL;
 import static com.andreabergia.sbvm.Instructions.DIV;
 import static com.andreabergia.sbvm.Instructions.DUP;
 import static com.andreabergia.sbvm.Instructions.HALT;
@@ -22,6 +23,7 @@ import static com.andreabergia.sbvm.Instructions.NOT;
 import static com.andreabergia.sbvm.Instructions.OR;
 import static com.andreabergia.sbvm.Instructions.POP;
 import static com.andreabergia.sbvm.Instructions.PUSH;
+import static com.andreabergia.sbvm.Instructions.RET;
 import static com.andreabergia.sbvm.Instructions.STORE;
 import static com.andreabergia.sbvm.Instructions.SUB;
 import static org.junit.Assert.assertEquals;
@@ -332,5 +334,31 @@ public class CPUTest {
     public void testStoreNeedsOneItemOnTheStack() {
         CPU cpu = new CPU(STORE, 0, HALT);
         cpu.run();
+    }
+
+    // Function calls
+
+    @Test
+    public void testFunctionCallNoArgumentsNoReturn() {
+        // addresses      0     1  2     3
+        CPU cpu = new CPU(CALL, 3, HALT, RET);
+        assertProgramRunsToHaltAndInstructionAddressIs(cpu, 3);
+        assertStackIsEmpty(cpu);
+    }
+
+    @Test
+    public void testFunctionCallNoArgumentsReturnsInt() {
+        // addresses      0     1  2     3     4  5
+        CPU cpu = new CPU(CALL, 3, HALT, PUSH, 7, RET);
+        assertProgramRunsToHaltAndInstructionAddressIs(cpu, 3);
+        assertStackContains(cpu, 7);
+    }
+
+    @Test
+    public void testFunctionDoublesGivenArgument() {
+        // addresses      0     1  2      3  4    5     6  7     8  9    10
+        CPU cpu = new CPU(PUSH, 3, CALL, 5, HALT, PUSH, 2, MUL, RET);
+        assertProgramRunsToHaltAndInstructionAddressIs(cpu, 5);
+        assertStackContains(cpu, 6);
     }
 }
