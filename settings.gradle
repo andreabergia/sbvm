@@ -1,1 +1,1 @@
-include 'vm'
+include 'vm', 'assembler'

@@ -1,0 +1,57 @@
+// Compiles the ANTLR v4 grammar and add its to the source code.
+// Adapted from https://github.com/ae6rt/gradle-antlr4-template
+ext.antlr = [
+        grammarpackage: "com.andreabergia.sbvm.antlr",
+        antlrSource   : 'src/main/antlr',
+        destinationDir: "src/generated/java"
+]
+
+configurations {
+    antlr4 {
+        description = "ANTLR4"
+    }
+}
+
+
+dependencies {
+    compile group: "org.antlr", name: "antlr4-runtime", version: "4.5"
+    antlr4 group: "org.antlr", name: "antlr4", version: "4.5"
+}
+
+
+task antlrOutputDir << {
+    mkdir(antlr.destinationDir)
+}
+
+task generateGrammarSource(dependsOn: antlrOutputDir, type: JavaExec) {
+    description = 'Generates Java sources from ANTLR4 grammars.'
+
+    inputs.dir file(antlr.antlrSource)
+    outputs.dir file(antlr.destinationDir)
+
+    def grammars = fileTree(antlr.antlrSource).include('**/*.g4')
+
+    main = 'org.antlr.v4.Tool'
+    classpath = configurations.antlr4
+    def pkg = antlr.grammarpackage.replaceAll("\\.", "/")
+    args = ["-o", "${antlr.destinationDir}/${pkg}", "-visitor", "-package", antlr.grammarpackage, grammars.files].flatten()
+}
+
+compileJava {
+    dependsOn generateGrammarSource
+    source antlr.destinationDir
+}
+
+clean {
+    delete antlr.destinationDir
+}
+
+
+// Add the generated directory to IntelliJ's source set
+apply plugin: 'idea'
+idea {
+    module {
+        sourceDirs += file(antlr.destinationDir)
+        generatedSourceDirs += file(antlr.destinationDir)
+    }
+}

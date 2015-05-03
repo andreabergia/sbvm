@@ -18,7 +18,16 @@ subprojects {
 }
 
 
+// Inter-project dependencies
+project(':assembler') {
+    dependencies {
+        compile project(':vm')
+    }
+}
+
+
 // Gradle wrapper
 task wrapper(type: Wrapper) {
     gradleVersion = '2.3'
 }
+

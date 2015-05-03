@@ -1,5 +1,6 @@
 package com.andreabergia.sbvm;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,5 +22,9 @@ public class Frame {
 
     public int getReturnAddress() {
         return returnAddress;
+    }
+
+    public Map<Integer, Integer> getVariables() {
+        return Collections.unmodifiableMap(variables);
     }
 }
