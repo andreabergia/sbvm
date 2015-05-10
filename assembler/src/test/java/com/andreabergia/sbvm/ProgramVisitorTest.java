@@ -97,4 +97,12 @@ public class ProgramVisitorTest {
     public void testLabelNotFound() throws Exception {
         parseProgram("JMP noLabel\n");
     }
+
+    @Test
+    public void testCommentsAreIgnored() throws Exception {
+        int[] program = parseProgram("" +
+                "// I am a comment!\n" +
+                "HALT // Comment inline\n");
+        assertArrayEquals(new int[]{HALT}, program);
+    }
 }

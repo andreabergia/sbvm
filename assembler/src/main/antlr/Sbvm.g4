@@ -4,7 +4,9 @@ grammar Sbvm;
 program: line*;
 
 // A line is either a label, or an instruction, followed by a newline
-line: (label | instruction) NEWLINE;
+line: (label | instruction | emptyLine) NEWLINE;
+
+emptyLine: ;
 
 // Labels are simply identifiers, followed by colons
 label: IDENTIFIER ':';
@@ -59,3 +61,6 @@ NEWLINE: '\r'? '\n';
 
 // Skip all whitespaces
 WHITESPACE: [ \t]+ -> skip;
+
+// Comments
+COMMENT: '//' ~('\r' | '\n')* -> skip;
